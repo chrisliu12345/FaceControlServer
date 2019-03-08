@@ -2,6 +2,7 @@ package com.gd.dao.analysis;
 
 import com.gd.domain.analysis.AnalysisRule;
 import com.gd.domain.analysis.Task;
+import com.gd.domain.analysis.TblAlarmLinkage;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +14,7 @@ public interface ITaskDao {
 
     /**
      * 查询任务常规编码
+     *
      * @param table
      * @return
      */
@@ -126,6 +128,7 @@ public interface ITaskDao {
 
     /**
      * 查询人的结构化数据
+     *
      * @param paramMap
      * @return
      */
@@ -401,10 +404,43 @@ public interface ITaskDao {
             "left join tbl_vehiclecolor vco on d.platecolor=vco.gatcode\n" +
             "left join tbl_vehicleclass vc on d.vehicleclass=vc.gatcode \n" +
             "left join tbl_vehiclebrand vcb on d.vehicleclass=vcb.gatcode\n" +
-            "left join tbl_res_attr re  on d.camid= re.resid "+
+            "left join tbl_res_attr re  on d.camid= re.resid " +
             "</script>")
     public List<Map<String, Object>> queryVehicle(Map<String, Object> paramMap);
 
-
+    @Select("<script>SELECT  id,Alarm_event_name as alarmEventName,Deviceid,Input_channel as inputChannel," +
+            " AlarmMethod,AlarmType,Notified_person as notifiedPerson,linkage_Method as linkageMethod,linkage_Camera as linkageCamera,linkage_Info as linkageInfo FROM tbl_alarm_linkage WHERE 1=1"
+            + "<if test=\"id!=null and id!=''\">" +
+            "AND id=#{id}" +
+            "</if>"
+            + "<if test=\"alarm_event_name!=null and alarm_event_name!=''\">" +
+            "AND alarm_event_name=#{alarm_event_name}" +
+            "</if>"
+            + "<if test=\"deviceId!=null and deviceId!=''\">" +
+            "AND Deviceid=#{deviceId}" +
+            "</if>"
+            + "<if test=\"input_channel!=null and input_channel!=''\">" +
+            "AND Input_channel=#{input_channel}" +
+            "</if>"
+            + "<if test=\"alarmMethod!=null and alarmMethod!=''\">" +
+            "AND AlarmMethod=#{alarmMethod}" +
+            "</if>"
+            + "<if test=\"alarmType!=null and alarmType!=''\">" +
+            "AND AlarmType=#{alarmType}" +
+            "</if>"
+            + "<if test=\"notified_person!=null and notified_person!=''\">" +
+            "AND Notified_person=#{notified_person}" +
+            "</if>"
+            + "<if test=\"linkage_method!=null and linkage_method!=''\">" +
+            "AND Linkage_Method=#{linkage_method}" +
+            "</if>"
+            + "<if test=\"linkage_camera!=null and linkage_camera!=''\">" +
+            "AND Linkage_Camera=#{linkage_camera}" +
+            "</if>"
+            + "<if test=\"linkage_info!=null and linkage_info!=''\">" +
+            "AND Linkage_Info=#{linkage_info}" +
+            "</if>"
+            + "</script>")
+    List<TblAlarmLinkage> queryAlarmLinkageList(Map<String, Object> map);
 
 }

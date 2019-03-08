@@ -3,6 +3,7 @@ package com.gd.service.analysis;
 import com.gd.dao.analysis.ITaskDao;
 import com.gd.domain.analysis.AnalysisRule;
 import com.gd.domain.analysis.Task;
+import com.gd.domain.analysis.TblAlarmLinkage;
 import com.gd.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -75,6 +76,7 @@ public class TaskService implements ITaskService{
             default:
                  ;
         }
+
         return taskDao.queryTaskGatCode(tablename);
 
     }
@@ -278,4 +280,8 @@ public class TaskService implements ITaskService{
         return taskDao.queryVehicle(paramMap);
     }
 
+    @Override
+    public List<TblAlarmLinkage> queryAlarmLink(Map<String, Object> paramMap){
+        return taskDao.queryAlarmLinkageList(paramMap);
+    }
 }

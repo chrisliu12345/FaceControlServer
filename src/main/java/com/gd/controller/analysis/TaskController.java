@@ -1,10 +1,11 @@
 package com.gd.controller.analysis;
 
+import com.gd.controller.common.SSEControler;
 import com.gd.domain.HandResult;
-import com.gd.domain.analysis.AnalysisResult;
-import com.gd.domain.analysis.AnalysisRule;
-import com.gd.domain.analysis.Task;
+import com.gd.domain.SseData;
+import com.gd.domain.analysis.*;
 import com.gd.service.analysis.ITaskService;
+import com.gd.util.StringUtils;
 import com.gd.util.TimeUtils;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -16,9 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 @RestController
 @RequestMapping("/task")
@@ -26,6 +29,13 @@ public class TaskController {
 
     @Autowired
     private ITaskService taskService;
+
+    @Autowired
+    private SSEControler sseControler;
+
+    @Autowired
+    @Qualifier("sseBlockingQueue")
+    private BlockingQueue<SseData> sseBlockingQueue;
 
     @RequestMapping("/gatcode/{gattype}")
     public String queryTaskGatCode(@PathVariable("gattype") int gattype){
@@ -188,12 +198,46 @@ public class TaskController {
     }
     @RequestMapping(value = "/test",method = RequestMethod.POST)
     public String  test() {
-        String[] abc={"abc","ddd"};
-        int[] in ={123,234};
-        Map<String,Object> map= new HashMap<>();
-        map.put("a",abc);
-        map.put("b",in);
-        Gson gson = new GsonBuilder().setDateFormat(TimeUtils.getNormalFormat()).create();
-        return gson.toJson(map);
+       /* System.out.println(" test thread id" + Thread.currentThread().getId());
+        sseBlockingQueue.offer("abc");
+        sseControler.pushData();*/
+       return "";
+    }
+    @RequestMapping(value = "/newAnalysisResult",method = RequestMethod.POST)
+    public String newAnalysisResult(@RequestBody Map<String,Object> analysisResult) {
+        Map<String,Object> params = new HashMap<>();
+        params.put("deviceId",analysisResult.get("camid"));
+        params.put("alarmMethod",5);
+        params.put("alarmType",analysisResult.get("ruleType"));
+
+        List<TblAlarmLinkage> tblAlarmLinkages = taskService.queryAlarmLink(null);
+        Map<String, HandResult<TblAlarmNotice>> handResultMap = new HashMap<>();
+        for (TblAlarmLinkage link : tblAlarmLinkages) {
+            TblAlarmNotice notice = new TblAlarmNotice();
+            notice.setEventId(analysisResult.get("abnormalid").toString());
+            notice.setLinkId(String.valueOf(link.getId()));
+            notice.setStatus(0);
+            notice.setLinkMethod(link.getLinkageMethod());
+            notice.setNotifyUser(link.getNotifiedPerson());
+            notice.setDateTime(analysisResult.get("occurtime").toString());
+            notice.setDeviceId(analysisResult.get("camid").toString());
+            notice.setLinkageInfo(link.getLinkageInfo());
+            notice.setLinkageCamera(link.getLinkageCamera());
+            notice.setAlarmDescription(analysisResult.get("rulename").toString());
+            String notifiedPerson = link.getNotifiedPerson();
+            if (!StringUtils.isNullOrEmpty(notifiedPerson)) {
+                String[] split = notifiedPerson.split(",");
+                for (String s : split) {
+                    SseData sseData = new SseData();
+                    sseData.setClientflag(s);
+                    sseData.setCode(100);
+                    sseData.setData(notice);
+                    sseBlockingQueue.offer(sseData);
+                    sseControler.pushData();
+                }
+            }
+        }
+
+        return "";
     }
 }
