@@ -1,164 +1,141 @@
 package com.gd.domain.analysis;
 
+import java.sql.Timestamp;
+
 public class TblAlarmLinkage {
     //
     private Integer id;
-    //
+
     private String alarmEventName;
     //
     private String deviceid;
+
+    private String deviceName;
+    //
+    private Integer alarmType;
+
+    private String alarmTypeName;
+
+    private String notifiedPerson;
+
+    private String notifiedPersonName;
+    //
+    private String linkageInfo;
+
+    private Timestamp createTime;
+
+    //创建人
+    private String createUser;
+
+    private String createUserName;
+
+    /*//
+    private String alarmEventName;
     //
     private Integer inputChannel;
     //
     private Integer alarmmethod;
-    //
-    private Integer alarmtype;
+
     //
     private String notifiedPerson;
     //
     private Integer linkageMethod;
     //
-    private String linkageCamera;
-    //
-    private String linkageInfo;
+    private String linkageCamera;*/
 
-    /**
-     * 设置：
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    /**
-     * 获取：
-     */
     public Integer getId() {
         return id;
     }
 
-    /**
-     * 设置：
-     */
-    public void setAlarmEventName(String alarmEventName) {
-        this.alarmEventName = alarmEventName;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    /**
-     * 获取：
-     */
-    public String getAlarmEventName() {
-        return alarmEventName;
-    }
-
-    /**
-     * 设置：
-     */
-    public void setDeviceid(String deviceid) {
-        this.deviceid = deviceid;
-    }
-
-    /**
-     * 获取：
-     */
     public String getDeviceid() {
         return deviceid;
     }
 
-    /**
-     * 设置：
-     */
-    public void setInputChannel(Integer inputChannel) {
-        this.inputChannel = inputChannel;
+    public void setDeviceid(String deviceid) {
+        this.deviceid = deviceid;
     }
 
-    /**
-     * 获取：
-     */
-    public Integer getInputChannel() {
-        return inputChannel;
-    }
-
-    /**
-     * 设置：
-     */
-    public void setAlarmmethod(Integer alarmmethod) {
-        this.alarmmethod = alarmmethod;
-    }
-
-    /**
-     * 获取：
-     */
-    public Integer getAlarmmethod() {
-        return alarmmethod;
-    }
-
-    /**
-     * 设置：
-     */
-    public void setAlarmtype(Integer alarmtype) {
-        this.alarmtype = alarmtype;
-    }
-
-    /**
-     * 获取：
-     */
     public Integer getAlarmtype() {
-        return alarmtype;
+        return alarmType;
     }
 
-    /**
-     * 设置：
-     */
-    public void setNotifiedPerson(String notifiedPerson) {
-        this.notifiedPerson = notifiedPerson;
+    public void setAlarmtype(Integer alarmtype) {
+        this.alarmType = alarmtype;
     }
 
-    /**
-     * 获取：
-     */
-    public String getNotifiedPerson() {
-        return notifiedPerson;
+    public String getLinkageInfo() {
+        return linkageInfo;
     }
 
-    /**
-     * 设置：
-     */
-    public void setLinkageMethod(Integer linkageMethod) {
-        this.linkageMethod = linkageMethod;
-    }
-
-    /**
-     * 获取：
-     */
-    public Integer getLinkageMethod() {
-        return linkageMethod;
-    }
-
-    /**
-     * 设置：
-     */
-    public void setLinkageCamera(String linkageCamera) {
-        this.linkageCamera = linkageCamera;
-    }
-
-    /**
-     * 获取：
-     */
-    public String getLinkageCamera() {
-        return linkageCamera;
-    }
-
-    /**
-     * 设置：
-     */
     public void setLinkageInfo(String linkageInfo) {
         this.linkageInfo = linkageInfo;
     }
 
-    /**
-     * 获取：
-     */
-    public String getLinkageInfo() {
-        return linkageInfo;
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getAlarmTypeName() {
+        return alarmTypeName;
+    }
+
+    public void setAlarmTypeName(String alarmTypeName) {
+        this.alarmTypeName = alarmTypeName;
+    }
+
+    public String getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
+    }
+
+    public String getNotifiedPerson() {
+        return notifiedPerson;
+    }
+
+    public void setNotifiedPerson(String notifiedPerson) {
+        this.notifiedPerson = notifiedPerson;
+    }
+
+    public String getNotifiedPersonName() {
+        return notifiedPersonName;
+    }
+
+    public void setNotifiedPersonName(String notifiedPersonName) {
+        this.notifiedPersonName = notifiedPersonName;
+    }
+
+    public String getCreateUserName() {
+        return createUserName;
+    }
+
+    public void setCreateUserName(String createUserName) {
+        this.createUserName = createUserName;
+    }
+
+    public String getAlarmEventName() {
+        return alarmEventName;
+    }
+
+    public void setAlarmEventName(String alarmEventName) {
+        this.alarmEventName = alarmEventName;
     }
 }

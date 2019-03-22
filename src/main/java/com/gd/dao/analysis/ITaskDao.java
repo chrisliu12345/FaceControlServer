@@ -1,5 +1,6 @@
 package com.gd.dao.analysis;
 
+import com.gd.domain.analysis.AnalysisResult;
 import com.gd.domain.analysis.AnalysisRule;
 import com.gd.domain.analysis.Task;
 import com.gd.domain.analysis.TblAlarmLinkage;
@@ -408,39 +409,58 @@ public interface ITaskDao {
             "</script>")
     public List<Map<String, Object>> queryVehicle(Map<String, Object> paramMap);
 
-    @Select("<script>SELECT  id,Alarm_event_name as alarmEventName,Deviceid,Input_channel as inputChannel," +
-            " AlarmMethod,AlarmType,Notified_person as notifiedPerson,linkage_Method as linkageMethod,linkage_Camera as linkageCamera,linkage_Info as linkageInfo FROM tbl_alarm_linkage WHERE 1=1"
-            + "<if test=\"id!=null and id!=''\">" +
-            "AND id=#{id}" +
-            "</if>"
-            + "<if test=\"alarm_event_name!=null and alarm_event_name!=''\">" +
-            "AND alarm_event_name=#{alarm_event_name}" +
-            "</if>"
-            + "<if test=\"deviceId!=null and deviceId!=''\">" +
-            "AND Deviceid=#{deviceId}" +
-            "</if>"
-            + "<if test=\"input_channel!=null and input_channel!=''\">" +
-            "AND Input_channel=#{input_channel}" +
-            "</if>"
-            + "<if test=\"alarmMethod!=null and alarmMethod!=''\">" +
-            "AND AlarmMethod=#{alarmMethod}" +
-            "</if>"
-            + "<if test=\"alarmType!=null and alarmType!=''\">" +
-            "AND AlarmType=#{alarmType}" +
-            "</if>"
-            + "<if test=\"notified_person!=null and notified_person!=''\">" +
-            "AND Notified_person=#{notified_person}" +
-            "</if>"
-            + "<if test=\"linkage_method!=null and linkage_method!=''\">" +
-            "AND Linkage_Method=#{linkage_method}" +
-            "</if>"
-            + "<if test=\"linkage_camera!=null and linkage_camera!=''\">" +
-            "AND Linkage_Camera=#{linkage_camera}" +
-            "</if>"
-            + "<if test=\"linkage_info!=null and linkage_info!=''\">" +
-            "AND Linkage_Info=#{linkage_info}" +
-            "</if>"
-            + "</script>")
-    List<TblAlarmLinkage> queryAlarmLinkageList(Map<String, Object> map);
 
+     @Insert("insert into tbl_analysisresult(ruletype,behaviorname,camid,ruleid,behaviorvalue,occurtime,objecttype,objectid,serviceid,resultpath) values" +
+             "(#{ruleType},#{behaviorName},#{camID},#{ruleID},#{behaviorValue},#{occurTime},#{objectType},#{objectID},#{serviceID},#{resultPath})")
+     int insertAnalysisResult(AnalysisResult analysisResult);
+
+    @Select("select DISTINCT t.camid, c.Name 'cameraname' from tbl_task t ,tbl_res_attr c where t.tasktype=100  and c.ResID=t.camid")
+    List<Map<String, Object>> queryAnalysisCamera();
+
+    @Insert("insert into tbl_alarm_linkage(id,deviceid,alarm_event_name,alarmtype,notified_person,linkage_Info,createUser,createtime) " +
+            "values(#{id},#{deviceid},#{alarmEventName},#{alarmType},#{notifiedPerson},#{linkageInfo},#{createUser},#{createTime})")
+    int insertAlarmLink(TblAlarmLinkage alarmLinkage);
+
+    @Select("<script>" +
+            "select * from (\n" +
+            "select id,alarm_event_name alarmeventname ,t.deviceid,r.name devicename, alarmtype,d.assistantdesc alarmtypenname, notified_person notifiedperson,GROUP_CONCAT(b.username) notifiedpersonname ,createtime ,c.username createusername,createuser from tbl_alarm_linkage t\n" +
+            "left join (select u.REALNAME username,a.id accountid from sys_userinfo u,sys_account a ,sys_account_user au where  a.id= au.accountid and au.userid=u.id) b on INSTR(t.notified_person,b.accountid)>0\n" +
+            "left join (select u.REALNAME username,a.id accountid ,a.username accountname from sys_userinfo u,sys_account a ,sys_account_user au where  a.id= au.accountid and au.userid=u.id) c on t.createuser = c.accountname\n" +
+            "left join  tbl_behaviortype d on t.alarmtype = d.gatcode \n" +
+            "left join tbl_res_attr r on t.deviceid=r.ResID\n" +
+            "group by id,alarm_event_name  ,t.deviceid,r.name,alarmtype, d.assistantdesc,notified_person  ,createtime ,c.username ,createuser\n" +
+            ") tb where 1=1  "+
+            "<if test=\"id!=null\" >\n"+
+            "            and id in\n" +
+            "            <foreach collection=\"id\" open=\"(\" separator=\",\" close=\")\" item=\"item\" index=\"index\">\n" +
+            "                #{item}\n" +
+            "            </foreach>\n" +
+            " </if>" +
+            "<if test=\"deviceid!=null\" >\n"+
+            "            and deviceid in\n" +
+            "            <foreach collection=\"deviceid\" open=\"(\" separator=\",\" close=\")\" item=\"item\" index=\"index\">\n" +
+            "                #{item}\n" +
+            "            </foreach>\n" +
+            " </if>" +
+            "<if test=\"notifiedperson!=null\" >\n"+
+            "            and notifiedperson in\n" +
+            "            <foreach collection=\"notifiedperson\" open=\"(\" separator=\",\" close=\")\" item=\"item\" index=\"index\">\n" +
+            "                #{item}\n" +
+            "            </foreach>\n" +
+            " </if>" +
+            "<if test=\"alarmtype!=null\" >\n"+
+            "            and alarmtype in\n" +
+            "            <foreach collection=\"alarmtype\" open=\"(\" separator=\",\" close=\")\" item=\"item\" index=\"index\">\n" +
+            "                #{item}\n" +
+            "            </foreach>\n" +
+            " </if>" +
+             "</script>")
+    List<TblAlarmLinkage> queryAlarmLink(Map<String, Object> map);
+
+
+    @Update("<script>UPDATE tbl_alarm_linkage set alarm_event_name=#{alarmEventName},deviceid=#{deviceid},alarmtype=#{alarmType},notified_person=#{notifiedPerson},linkage_info=#{linkageInfo},createtime=#{createTime} where id =#{id}</script>")
+    int updateTblAlarmLinkage(TblAlarmLinkage tblAlarmLinkage);
+
+    @Delete("<script>DELETE FROM tbl_alarm_linkage where id =#{id}</script>")
+    int deleteTblAlarmLinkage(Integer id);
 }

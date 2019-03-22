@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by dell on 2017/1/12.
@@ -54,5 +55,10 @@ public class AccountUserServiceImpl implements IAccountUserService {
     @Override
     public void delete(AccountUser accountUser) {
         this.accountUserDao.delete(accountUser);
+    }
+
+    @Override
+    public List<Map<String,String>> queryUserHaveAccount(){
+        return  accountUserDao.queryUserHaveAccount();
     }
 }

@@ -5,6 +5,7 @@ import com.gd.domain.account_user.AccountUser;
 import com.gd.domain.userinfo.UserInfo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by dell on 2017/1/12.
@@ -33,4 +34,6 @@ public interface IAccountUserService {
     List<UserInfo> queryAccountUsers(String id);
     //删除账户的用户关系
     void delete(AccountUser accountUser);
+    //查询有账户的用户
+    List<Map<String,String>> queryUserHaveAccount();
 }

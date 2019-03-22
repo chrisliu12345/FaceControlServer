@@ -1,6 +1,7 @@
 package com.gd.service.analysis;
 
 import com.gd.dao.analysis.ITaskDao;
+import com.gd.domain.analysis.AnalysisResult;
 import com.gd.domain.analysis.AnalysisRule;
 import com.gd.domain.analysis.Task;
 import com.gd.domain.analysis.TblAlarmLinkage;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +24,11 @@ public class TaskService implements ITaskService{
     public List<Map<String, Object>> queryTaskGatCode(int tabletype){
         String tablename=null;
         switch (tabletype) {
+            case 0:
+                tablename = "tbl_tasktype";
+                break;
             case 1:
-                tablename = "tbl_vevent";
+                tablename = "tbl_behaviortype";
                 break;
             case 2:
                 tablename = "tbl_age";
@@ -154,7 +159,7 @@ public class TaskService implements ITaskService{
             for (AnalysisRule analysisRule : analysisRules) {
                 analysisRule.setCamID(task.getCamID());
                 analysisRule.setTaskID(taskid);
-                analysisRule.setRuleID(taskid++);
+                //analysisRule.setRuleID(taskid++);
                 //如果前端未给值,则初始化为3 已创建
                 if(analysisRule.getControlStatus()==null){
                     analysisRule.setControlStatus(3);
@@ -184,7 +189,12 @@ public class TaskService implements ITaskService{
      * @return
      */
     @Override
-    public int createTaskAnalysisRule(AnalysisRule analysisRule){
+    public int createTaskAnalysisRule(AnalysisRule analysisRule) {
+        if (analysisRule.getRuleID() == null || analysisRule.getRuleID() == 0) {
+            int id = (int) (System.currentTimeMillis() / 1000);
+            analysisRule.setRuleID(id);
+        }
+
         int n = taskDao.insertTaskAnalysiRule(analysisRule);
         return n;
     }
@@ -281,7 +291,31 @@ public class TaskService implements ITaskService{
     }
 
     @Override
+    public int insertAnalysisResult(AnalysisResult analysisResult){
+       return taskDao.insertAnalysisResult(analysisResult);
+    }
+
+    @Override
+    public List<Map<String, Object>> queryAnalysisCamera() {
+        return taskDao.queryAnalysisCamera();
+    }
+    @Override
     public List<TblAlarmLinkage> queryAlarmLink(Map<String, Object> paramMap){
-        return taskDao.queryAlarmLinkageList(paramMap);
+        return taskDao.queryAlarmLink(paramMap);
+    }
+
+    @Override
+    public int insertAlarmLink(TblAlarmLinkage tblAlarmLinkage){
+        tblAlarmLinkage.setId((int)(System.currentTimeMillis()/1000));
+        tblAlarmLinkage.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        int i = taskDao.insertAlarmLink(tblAlarmLinkage);
+        return tblAlarmLinkage.getId();
+    }
+    public int updateTblAlarmLinkage(TblAlarmLinkage tblAlarmLinkage){
+        tblAlarmLinkage.setCreateTime(new Timestamp((System.currentTimeMillis()/1000)));
+        return taskDao.updateTblAlarmLinkage(tblAlarmLinkage);
+    }
+    public int deleteTblAlarmLinkage(Integer id){
+        return taskDao.deleteTblAlarmLinkage(id);
     }
 }

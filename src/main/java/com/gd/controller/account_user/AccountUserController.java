@@ -1,5 +1,6 @@
 package com.gd.controller.account_user;
 
+import com.gd.domain.HandResult;
 import com.gd.domain.account.Account;
 import com.gd.domain.account_role.AccountRole;
 import com.gd.domain.role.Role;
@@ -7,6 +8,7 @@ import com.gd.domain.userinfo.UserInfo;
 import com.gd.service.account.IAccountService;
 import com.gd.service.account_user.IAccountUserService;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -74,5 +76,14 @@ public class AccountUserController {
             resultMap.put("role",roleList);
             return gson.toJson(resultMap);
         }
+    }
+    @RequestMapping(value = "/queryUserHaveAccount")
+    public String queryUserHaveAccount(){
+        List<Map<String, String>> queryUserHaveAccount = accountUserService.queryUserHaveAccount();
+        HandResult<List<Map<String, String>>>  handResult= new HandResult<>();
+        handResult.setData(queryUserHaveAccount);
+        handResult.setCode(HandResult.Success);
+        String json = new GsonBuilder().create().toJson(handResult);
+        return json;
     }
 }

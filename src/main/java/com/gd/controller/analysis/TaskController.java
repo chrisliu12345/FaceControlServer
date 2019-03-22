@@ -5,6 +5,7 @@ import com.gd.domain.HandResult;
 import com.gd.domain.SseData;
 import com.gd.domain.analysis.*;
 import com.gd.service.analysis.ITaskService;
+import com.gd.util.HttpUtil;
 import com.gd.util.StringUtils;
 import com.gd.util.TimeUtils;
 import com.github.pagehelper.Page;
@@ -13,10 +14,16 @@ import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.swagger.models.auth.In;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.sql.Timestamp;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +33,9 @@ import java.util.concurrent.BlockingQueue;
 @RestController
 @RequestMapping("/task")
 public class TaskController {
+    private static Logger log = LoggerFactory.getLogger(TaskController.class);
+    public  static  int AnalysisStateStarting=1;
+    public static int TaskTypeBehavir=100;
 
     @Autowired
     private ITaskService taskService;
@@ -37,10 +47,25 @@ public class TaskController {
     @Qualifier("sseBlockingQueue")
     private BlockingQueue<SseData> sseBlockingQueue;
 
+    @Value("${c.task.structing.start.url}")
+    private String structingstarturl;
+
+    @Value("${c.task.structing.stop.url}")
+    private String structingstopurl;
+
+    @Value("${c.task.behavior.start.url}")
+    private String behaviorstarturl;
+
+    @Value("${c.task.behavior.stop.url}")
+    private String behaviorstopurl;
+
     @RequestMapping("/gatcode/{gattype}")
     public String queryTaskGatCode(@PathVariable("gattype") int gattype){
         List<Map<String, Object>> maps = taskService.queryTaskGatCode(gattype);
         Gson gson = new GsonBuilder().create();
+        HandResult<List<Map<String, Object>>> result = new HandResult<>();
+        result.setCode(HandResult.Success);
+        result.setData(maps);
         return  gson.toJson(maps);
     }
 
@@ -100,9 +125,23 @@ public class TaskController {
         return responsestr;
     }
 
-    @RequestMapping("/rulestatus/{ruleid}/{status}")
-    public String changeRuleStatus(@PathVariable("ruleid") int ruleid, @PathVariable("status")int status) {
+    @RequestMapping(value = "/ar/create",method = RequestMethod.POST)
+    public String creatAnalysisRule(@RequestBody String taskstr) {
+        String responsestr;
+        Gson gson = new GsonBuilder().setDateFormat(TimeUtils.getNormalFormat()).create();
+        AnalysisRule analysisRule = gson.fromJson(taskstr, AnalysisRule.class);
+        int n = taskService.createTaskAnalysisRule(analysisRule);
+        HandResult<AnalysisRule> result = new HandResult<>();
+        result.setData(analysisRule);
+        result.setCode(HandResult.Success);
+        responsestr = gson.toJson(result);
+        return responsestr;
+    }
+
+    @RequestMapping("/rulestatus/{taskid}/{ruleid}/{status}")
+    public String changeRuleStatus(@PathVariable("taskid") int taskid,@PathVariable("ruleid") int ruleid, @PathVariable("status")int status) {
         int r = taskService.changeAnalysisRuleStatus(ruleid, status);
+
         HandResult<String> handResult = new HandResult<>();
         handResult.setCode(HandResult.Success);
         Gson gson = new Gson();
@@ -120,9 +159,12 @@ public class TaskController {
         return re;
     }
 
-    @RequestMapping("/status/{taskid}/{status}")
-    public String changeTaskStatus(@PathVariable("taskid") int taskid, @PathVariable("status")int status) {
+    @RequestMapping("/status/{taskid}/{tasktype}/{status}")
+    public String changeTaskStatus(@PathVariable("taskid") int taskid,@PathVariable("tasktype") int tasktype, @PathVariable("status")int status) {
         int r = taskService.changeTaskStatus(taskid, status);
+
+        HttpUtil.ResposeData resposeData = changeAnalysisRuleState(taskid, status, tasktype);
+
         HandResult<String> handResult = new HandResult<>();
         handResult.setCode(HandResult.Success);
         Gson gson = new Gson();
@@ -203,27 +245,35 @@ public class TaskController {
         sseControler.pushData();*/
        return "";
     }
-    @RequestMapping(value = "/newAnalysisResult",method = RequestMethod.POST)
-    public String newAnalysisResult(@RequestBody Map<String,Object> analysisResult) {
-        Map<String,Object> params = new HashMap<>();
-        params.put("deviceId",analysisResult.get("camid"));
-        params.put("alarmMethod",5);
-        params.put("alarmType",analysisResult.get("ruleType"));
 
+    /**
+     * 新增异常行为分析结果
+     * @param analysisResult
+     * @return
+     */
+    @RequestMapping(value = "/newAnalysisResult",method = RequestMethod.POST)
+    public String newAnalysisResult(@RequestBody Map<String,Object> analysisResult) throws ParseException {
+        AnalysisResult analysisResult1 = new AnalysisResult();
+        analysisResult1.setRuleType(analysisResult.containsKey ("type")?(int)analysisResult.get("type"):null);
+        analysisResult1.setBehaviorName(analysisResult.containsKey ("behaviorName")?analysisResult.get("behaviorName").toString():null);
+        analysisResult1.setCamID(analysisResult.containsKey ("camID")?(int)analysisResult.get("camID"):null);
+        analysisResult1.setOccurTime(analysisResult.containsKey ("occurTime")?new Timestamp(TimeUtils.strToDate( analysisResult.get("occurTime").toString()).getTime()):null);
+        analysisResult1.setObjectType(analysisResult.containsKey ("objectType")?(int)analysisResult.get("objectType"):null);
+        analysisResult1.setObjectID(analysisResult.containsKey ("objectID")?(int)analysisResult.get("objectID"):null);
+        analysisResult1.setServiceID(analysisResult.containsKey ("serviceID")?(int)analysisResult.get("serviceID"):null);
+        analysisResult1.setResultPath(analysisResult.containsKey ("resultPath")?(String)analysisResult.get("resultPath"):null);
+
+        taskService.insertAnalysisResult(analysisResult1);
+
+        Map<String,Object> params = new HashMap<>();
+        params.put("deviceid",analysisResult.get("camid"));
+        params.put("alarmtype",analysisResult.get("type"));
         List<TblAlarmLinkage> tblAlarmLinkages = taskService.queryAlarmLink(null);
         Map<String, HandResult<TblAlarmNotice>> handResultMap = new HashMap<>();
         for (TblAlarmLinkage link : tblAlarmLinkages) {
-            TblAlarmNotice notice = new TblAlarmNotice();
-            notice.setEventId(analysisResult.get("abnormalid").toString());
-            notice.setLinkId(String.valueOf(link.getId()));
-            notice.setStatus(0);
-            notice.setLinkMethod(link.getLinkageMethod());
-            notice.setNotifyUser(link.getNotifiedPerson());
-            notice.setDateTime(analysisResult.get("occurtime").toString());
-            notice.setDeviceId(analysisResult.get("camid").toString());
-            notice.setLinkageInfo(link.getLinkageInfo());
-            notice.setLinkageCamera(link.getLinkageCamera());
-            notice.setAlarmDescription(analysisResult.get("rulename").toString());
+            analysisResult.put("alarmTypeName",link.getAlarmTypeName());
+            analysisResult.put("camName",link.getDeviceName());
+
             String notifiedPerson = link.getNotifiedPerson();
             if (!StringUtils.isNullOrEmpty(notifiedPerson)) {
                 String[] split = notifiedPerson.split(",");
@@ -231,13 +281,122 @@ public class TaskController {
                     SseData sseData = new SseData();
                     sseData.setClientflag(s);
                     sseData.setCode(100);
-                    sseData.setData(notice);
+                    sseData.setData(analysisResult);
                     sseBlockingQueue.offer(sseData);
                     sseControler.pushData();
                 }
             }
         }
-
         return "";
+    }
+
+    /**
+     * 向C++发送服务请求
+     * @param taskid
+     * @param status
+     * @param tasktype
+     * @return
+     */
+    private HttpUtil.ResposeData changeAnalysisRuleState(int taskid,int status,int tasktype) {
+        String url = null;
+        String jsonstr = null;
+        //结构化和人脸侦查
+        if (tasktype != TaskTypeBehavir) {
+            jsonstr = "[{\"taskID\":\"" + taskid + "\"}]";
+            if (status == AnalysisStateStarting) {
+                url = structingstarturl;
+            } else {
+                url = structingstopurl;
+            }
+        } else {
+            if (status == AnalysisStateStarting) {
+                url = behaviorstarturl + taskid;
+            } else {
+                url = behaviorstopurl + taskid;
+            }
+        }
+        log.info("向：" + url + "-body:" + jsonstr + "发送请求");
+        HttpUtil.ResposeData resposeData = HttpUtil.httpPost(url, "", null, jsonstr, HttpUtil.ContentJson, null);
+        log.info(url + "应答" + resposeData.getCode() + ":" + resposeData.getData());
+        return resposeData;
+    }
+
+
+    /**
+     * 查询已配置异常行为分析的相机
+     * @return
+     */
+    @RequestMapping(value = "/queryAnalysisCamera")
+    public String queryAnalysisCamera(){
+        List<Map<String, Object>> maps = taskService.queryAnalysisCamera();
+        HandResult<List<Map<String, Object>>> result = new HandResult<>();
+        Gson gson = new GsonBuilder().create();
+        result.setCode(HandResult.Success);
+        result.setData(maps);
+        return gson.toJson(result);
+    }
+
+
+    @RequestMapping(value = "/queryalarmlink",method = RequestMethod.POST)
+    public String queryAlarmLink(@RequestBody Map<String,Object> queryalarmlink){
+        List<TblAlarmLinkage> tblAlarmLinkages = taskService.queryAlarmLink(queryalarmlink);
+        Gson gson = new GsonBuilder().setDateFormat(TimeUtils.getNormalFormat()).create();
+        HandResult<List<TblAlarmLinkage>> result = new HandResult<>();
+        result.setCode(HandResult.Success);
+        result.setData(tblAlarmLinkages);
+        return gson.toJson(result);
+    }
+
+    /**
+     * 新建告警联动
+     * @param tblAlarmLinkage 接收字符串（因时间字符串不能直接转化为timestame 的问题，不能直接使用类）
+     * @return
+     */
+    @RequestMapping(value = "/newalarmlink",method = RequestMethod.POST)
+    public String insertAlarmLink(@RequestBody String tblAlarmLinkage, Principal principal) {
+        Gson gson = new GsonBuilder().setDateFormat(TimeUtils.getNormalFormat()).create();
+        TblAlarmLinkage tblAlarmLinkage1 = gson.fromJson(tblAlarmLinkage, TblAlarmLinkage.class);
+        tblAlarmLinkage1.setCreateUser(principal.getName());
+        int id = taskService.insertAlarmLink(tblAlarmLinkage1);
+
+        HandResult<Integer> result = new HandResult<>();
+        result.setCode(HandResult.Success);
+        result.setData(id);
+        return gson.toJson(result);
+    }
+
+
+    /**
+     * 更新告警联动数据
+     * @param tblAlarmLinkage
+     * @param principal
+     * @return
+     */
+    @RequestMapping(value = "/updatealarmlink",method = RequestMethod.POST)
+    public String updateAlarmLink(@RequestBody String tblAlarmLinkage, Principal principal) {
+        Gson gson = new GsonBuilder().setDateFormat(TimeUtils.getNormalFormat()).create();
+        TblAlarmLinkage tblAlarmLinkage1 = gson.fromJson(tblAlarmLinkage, TblAlarmLinkage.class);
+        tblAlarmLinkage1.setCreateUser(principal.getName());
+        int id = taskService.updateTblAlarmLinkage(tblAlarmLinkage1);
+        HandResult<Integer> result = new HandResult<>();
+        result.setCode(HandResult.Success);
+        result.setData(1);
+        return gson.toJson(result);
+    }
+
+    /**
+     * 删除告警联动
+     * @param linkid
+     * @param principal
+     * @return
+     */
+    @RequestMapping(value = "/deletealarmlink/{linkid}")
+    public String updateAlarmLink(@PathVariable("linkid") int linkid, Principal principal) {
+        int id = taskService.deleteTblAlarmLinkage(linkid);
+        HandResult<Integer> result = new HandResult<>();
+        result.setCode(HandResult.Success);
+        result.setData(1);
+        Gson gson = new GsonBuilder().create();
+        return gson.toJson(result);
     }
 }

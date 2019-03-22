@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by dell on 2017/1/12.
@@ -63,4 +64,7 @@ public interface IAccountUserDao {
             "accountId=#{accountId}\n" +
             "</if></script>")
     void delete(AccountUser accountUser);
+
+    @Select("select u.REALNAME 'username',u.ID 'userid' ,a.Id 'accountid' from  sys_userinfo u,sys_account_user au,sys_account a where u.ID=au.USERID and au.ACCOUNTID=a.ID")
+    List<Map<String,String>> queryUserHaveAccount();
 }
