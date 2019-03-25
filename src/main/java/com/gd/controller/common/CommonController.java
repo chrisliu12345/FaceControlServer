@@ -120,6 +120,10 @@ public class CommonController {
         }
     return result;
     }
-
-
+    //注册错误清除
+    @RequestMapping(value="/cleanRegister",method = RequestMethod.GET)
+    public int cleanRegister(){
+        int result=this.iConfigService.cleanRegister();
+        return result;
+    }
 }

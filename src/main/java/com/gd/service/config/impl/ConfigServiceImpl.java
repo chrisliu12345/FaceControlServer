@@ -265,6 +265,15 @@ public class ConfigServiceImpl implements IConfigService {
     }
 
     @Override
+    public Integer cleanRegister() {
+        this.configDao.cleanRegister1();
+        this.configDao.cleanRegister2();
+        this.configDao.cleanRegister3();
+        this.configDao.cleanRegister4();
+        return 200;
+    }
+
+    @Override
     public void cleanAttendanceData(String year) {
         //清除数据库数据
         this.configDao.cleanAttendanceData(year);

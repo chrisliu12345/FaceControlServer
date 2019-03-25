@@ -95,30 +95,36 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 
                 .authorizeRequests()
-                //.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
+                .antMatchers(HttpMethod.GET, "/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/**").permitAll()
+                .antMatchers(HttpMethod.PUT, "/**").permitAll()
+                .antMatchers(HttpMethod.DELETE, "/**").permitAll()
                 // 允许对于网站静态资源的无授权访问
-                .antMatchers(
-                        HttpMethod.GET,
-                        "/",
-                        "/*.html",
-                        "/favicon.ico",
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js",
-                        "/api/hello/hello",
-                        "/userExcel/downloadFile",
-                        "/config/downloadFile",
-                        "/common/delete/*",
-                         "/user/CsResult/*/*"
-                ).permitAll()
-                .antMatchers(
-                        HttpMethod.POST,
-                        "/",
-                        "/websocket",
-                        "/userExcel/userImport"
-
-                ).permitAll()
+//                .antMatchers(
+//                        HttpMethod.GET,
+//                        "/**",
+//                        "/",
+//                        "/resource/menus/",
+//                        "/*.html",
+//                        "/favicon.ico",
+//                        "/**/*.html",
+//                        "/**/*.css",
+//                        "/**/*.js",
+//                        "/api/hello/hello",
+//                        "/userExcel/downloadFile",
+//                        "/config/downloadFile",
+//                        "/common/delete/*",
+//                         "/user/CsResult/*/*"
+//                ).permitAll()
+//                .antMatchers(
+//                        HttpMethod.POST,
+//                        "/",
+//                        "/**",
+//                      //  "/*/*","/*/*/*","/*/*/*/*",
+//                        "/websocket",
+//                        "/userExcel/userImport"
+//
+//                ).permitAll()
                 // 对于获取token的rest api要允许匿名访问
                 .antMatchers("/auth/**").permitAll()
                 // 除上面外的所有请求全部需要鉴权认证

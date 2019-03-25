@@ -109,4 +109,6 @@ public interface IConfigService {
     void cleanAttendanceData(String year);
 
     List<UserInfo> getNamesByOrgId(String id);
+
+    Integer cleanRegister();
 }

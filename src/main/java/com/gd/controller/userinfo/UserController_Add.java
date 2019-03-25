@@ -63,6 +63,7 @@ public class UserController_Add {
                 //根据name值拿取文件
                 MultipartFile zipFile = multiRequest.getFile(name);
                 String path = rootPath1 + zipFile.getOriginalFilename();
+                System.out.println(zipFile.getOriginalFilename());
                 //对文件名进行分割再拼接
                 String[] buildName = new String[2];
                 buildName = zipFile.getOriginalFilename().split("_");

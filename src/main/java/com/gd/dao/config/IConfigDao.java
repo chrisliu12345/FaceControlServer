@@ -187,4 +187,12 @@ public interface IConfigDao {
     void cleanAttendanceData(String year);
     @Select("<script>SELECT * FROM sys_userinfo where ORGID=#{id}</script>")
     List<UserInfo> getNamesByOrgId(String id);
+    @Delete("DELETE FROM sys_csresult")
+    Integer cleanRegister1();
+    @Delete("DELETE FROM sys_csresult1")
+    Integer cleanRegister2();
+    @Delete("DELETE FROM sys_importuser_tmp")
+    Integer cleanRegister3();
+    @Delete("DELETE FROM sys_importuser1_tmp")
+    Integer cleanRegister4();
 }
