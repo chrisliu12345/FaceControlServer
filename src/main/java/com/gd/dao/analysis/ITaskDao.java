@@ -1,7 +1,9 @@
 package com.gd.dao.analysis;
 
+import com.gd.domain.analysis.AnalysisResult;
 import com.gd.domain.analysis.AnalysisRule;
 import com.gd.domain.analysis.Task;
+import com.gd.domain.analysis.TblAlarmLinkage;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +15,7 @@ public interface ITaskDao {
 
     /**
      * 查询任务常规编码
+     *
      * @param table
      * @return
      */
@@ -126,6 +129,7 @@ public interface ITaskDao {
 
     /**
      * 查询人的结构化数据
+     *
      * @param paramMap
      * @return
      */
@@ -401,10 +405,62 @@ public interface ITaskDao {
             "left join tbl_vehiclecolor vco on d.platecolor=vco.gatcode\n" +
             "left join tbl_vehicleclass vc on d.vehicleclass=vc.gatcode \n" +
             "left join tbl_vehiclebrand vcb on d.vehicleclass=vcb.gatcode\n" +
-            "left join tbl_res_attr re  on d.camid= re.resid "+
+            "left join tbl_res_attr re  on d.camid= re.resid " +
             "</script>")
     public List<Map<String, Object>> queryVehicle(Map<String, Object> paramMap);
 
 
+     @Insert("insert into tbl_analysisresult(ruletype,behaviorname,camid,ruleid,behaviorvalue,occurtime,objecttype,objectid,serviceid,resultpath) values" +
+             "(#{ruleType},#{behaviorName},#{camID},#{ruleID},#{behaviorValue},#{occurTime},#{objectType},#{objectID},#{serviceID},#{resultPath})")
+     int insertAnalysisResult(AnalysisResult analysisResult);
 
+    @Select("select DISTINCT t.camid, c.Name 'cameraname' from tbl_task t ,tbl_res_attr c where t.tasktype=100  and c.ResID=t.camid")
+    List<Map<String, Object>> queryAnalysisCamera();
+
+    @Insert("insert into tbl_alarm_linkage(id,deviceid,alarm_event_name,alarmtype,notified_person,linkage_Info,createUser,createtime) " +
+            "values(#{id},#{deviceid},#{alarmEventName},#{alarmType},#{notifiedPerson},#{linkageInfo},#{createUser},#{createTime})")
+    int insertAlarmLink(TblAlarmLinkage alarmLinkage);
+
+    @Select("<script>" +
+            "select * from (\n" +
+            "select id,alarm_event_name alarmeventname ,t.deviceid,r.name devicename, alarmtype,d.assistantdesc alarmtypenname, notified_person notifiedperson,GROUP_CONCAT(b.username) notifiedpersonname ,createtime ,c.username createusername,createuser from tbl_alarm_linkage t\n" +
+            "left join (select u.REALNAME username,a.id accountid from sys_userinfo u,sys_account a ,sys_account_user au where  a.id= au.accountid and au.userid=u.id) b on INSTR(t.notified_person,b.accountid)>0\n" +
+            "left join (select u.REALNAME username,a.id accountid ,a.username accountname from sys_userinfo u,sys_account a ,sys_account_user au where  a.id= au.accountid and au.userid=u.id) c on t.createuser = c.accountname\n" +
+            "left join  tbl_behaviortype d on t.alarmtype = d.gatcode \n" +
+            "left join tbl_res_attr r on t.deviceid=r.ResID\n" +
+            "group by id,alarm_event_name  ,t.deviceid,r.name,alarmtype, d.assistantdesc,notified_person  ,createtime ,c.username ,createuser\n" +
+            ") tb where 1=1  "+
+            "<if test=\"id!=null\" >\n"+
+            "            and id in\n" +
+            "            <foreach collection=\"id\" open=\"(\" separator=\",\" close=\")\" item=\"item\" index=\"index\">\n" +
+            "                #{item}\n" +
+            "            </foreach>\n" +
+            " </if>" +
+            "<if test=\"deviceid!=null\" >\n"+
+            "            and deviceid in\n" +
+            "            <foreach collection=\"deviceid\" open=\"(\" separator=\",\" close=\")\" item=\"item\" index=\"index\">\n" +
+            "                #{item}\n" +
+            "            </foreach>\n" +
+            " </if>" +
+            "<if test=\"notifiedperson!=null\" >\n"+
+            "            and notifiedperson in\n" +
+            "            <foreach collection=\"notifiedperson\" open=\"(\" separator=\",\" close=\")\" item=\"item\" index=\"index\">\n" +
+            "                #{item}\n" +
+            "            </foreach>\n" +
+            " </if>" +
+            "<if test=\"alarmtype!=null\" >\n"+
+            "            and alarmtype in\n" +
+            "            <foreach collection=\"alarmtype\" open=\"(\" separator=\",\" close=\")\" item=\"item\" index=\"index\">\n" +
+            "                #{item}\n" +
+            "            </foreach>\n" +
+            " </if>" +
+             "</script>")
+    List<TblAlarmLinkage> queryAlarmLink(Map<String, Object> map);
+
+
+    @Update("<script>UPDATE tbl_alarm_linkage set alarm_event_name=#{alarmEventName},deviceid=#{deviceid},alarmtype=#{alarmType},notified_person=#{notifiedPerson},linkage_info=#{linkageInfo},createtime=#{createTime} where id =#{id}</script>")
+    int updateTblAlarmLinkage(TblAlarmLinkage tblAlarmLinkage);
+
+    @Delete("<script>DELETE FROM tbl_alarm_linkage where id =#{id}</script>")
+    int deleteTblAlarmLinkage(Integer id);
 }

@@ -31,6 +31,13 @@ public class TimeUtils {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.parse(time);
     }
+    public static String dateToStr(Date time,String format) {
+        if (StringUtils.isNullOrEmpty(format)) {
+            format = getNormalFormat();
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.format(time);
+    }
     public static String getNormalFormat(){
         return "yyyy-MM-dd HH:mm:ss";
     }

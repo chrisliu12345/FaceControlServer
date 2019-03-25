@@ -1,6 +1,6 @@
 package com.gd.domain.analysis;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 
 public class AnalysisResult {
     private Integer abnormalID;
