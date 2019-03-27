@@ -95,10 +95,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/**").permitAll()
-                .antMatchers(HttpMethod.PUT, "/**").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/**").permitAll()
+                .antMatchers(HttpMethod.GET,"/**","/resource/menus").permitAll()
+                .antMatchers(HttpMethod.POST,"/**").permitAll()
+                .antMatchers(HttpMethod.PUT,"/**").permitAll()
+                .antMatchers(HttpMethod.DELETE,"/**").permitAll()
                 // 允许对于网站静态资源的无授权访问
 //                .antMatchers(
 //                        HttpMethod.GET,

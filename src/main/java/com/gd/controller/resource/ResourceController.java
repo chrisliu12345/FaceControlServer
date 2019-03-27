@@ -38,8 +38,7 @@ import java.util.Map;
 public class ResourceController {
     @Autowired
     private IResourceService resourceService;
-
-    @GetMapping(value = "/menus")
+    @RequestMapping(value = "/menus",method = RequestMethod.GET)
     public String getMenus(@AuthenticationPrincipal JwtUser loadUser) {
         List<Resource> resourceList = new ArrayList<>();
         resourceList = this.resourceService.queryForResourceByUsernameAndType(loadUser.getUsername(), "MENU");
