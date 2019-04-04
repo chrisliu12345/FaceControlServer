@@ -51,7 +51,6 @@ public class AuthServiceImpl implements AuthService {
 
         //在安全后重新加载密码，以便我们可以生成令牌
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-         System.out.println("我是UserDetails:"+userDetails);
         final String token = jwtTokenUtil.generateToken(userDetails);
         return token;
     }

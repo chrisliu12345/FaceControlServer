@@ -74,10 +74,15 @@ public interface IResAttrDao {
     List<Res_Attr> searchCameraName(Res_Attr res_attr);
     @Select("select * from  tbl_res_attr where ResType='131' or ResType='132'")
     List<Res_Attr> getVideoCameraTbl();
+    @Select("select * from  tbl_res_attr where ResType='131' or ResType='132'LIMIT #{startPage},10")
+    List<Res_Attr> getVideoCameraTblMa(int startPage);
     @Select("select IPAddress from tbl_service where ServiceID=2")
     String queryFortblServiceByIPAddress();
     @Select("select count(*) from tbl_res_attr where IPAddress=#{ip}")
      int searchForResAttrByIP(String ip);
     @Select("select * from tbl_res_attr where ResID=#{id}")
     Res_Attr getResAttrOne(int id);
+
+    @Select("select count(*) from tbl_res_attr")
+    Integer getRescount();
 }

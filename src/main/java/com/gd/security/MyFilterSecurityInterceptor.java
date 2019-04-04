@@ -67,7 +67,6 @@ public class MyFilterSecurityInterceptor
 
 
     public void invoke( FilterInvocation fi ) throws IOException, ServletException{
-        System.out.println("filter..........................");
         InterceptorStatusToken  token = super.beforeInvocation(fi);
         try{
             fi.getChain().doFilter(fi.getRequest(), fi.getResponse());

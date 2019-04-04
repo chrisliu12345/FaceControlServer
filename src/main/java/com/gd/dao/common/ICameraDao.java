@@ -13,6 +13,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -67,4 +68,6 @@ public interface ICameraDao {
     void deleteStoreplan(SaveConfig saveConfig);
     @Select("<script>SELECT * FROM tbl_camera WHERE ResID=#{id}</script>")
     Camera1 getCameraOne(int id);
+
+
 }

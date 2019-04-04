@@ -239,16 +239,14 @@ public class CameraController {
         }
     };
     //获取视频联网平台摄像机数据
-    @RequestMapping( value = "/tblCamera", method = RequestMethod.GET)
-    public String getTblCamera() {
+    @RequestMapping( value = "/tblCamera", method = RequestMethod.POST)
+    public String getTblCamera(@RequestBody String page) {
         Map<String, Object> maps = new HashMap<>();
         Gson gson = new Gson();
         //获取联网平台的设备数据
-       List<Res_Attr> resAttrList1=this.resService.getVideoCameraTbl();
-        System.out.println("视频联网平台数据源"+resAttrList1.size());
+       List<Res_Attr> resAttrList1=this.resService.getVideoCameraTblMa(Integer.parseInt(page));
       //获取人脸布控系统设备数据
         List<Res_Attr> resAttrList2=this.resService.getVideoCameraTbl2();
-        System.out.println("人脸布控系统设备数据"+resAttrList2.size());
         if(resAttrList2.size()<=0){
             maps.put("data", resAttrList1);
             return gson.toJson(maps);
@@ -256,16 +254,28 @@ public class CameraController {
             List<Res_Attr> compresAttr = new ArrayList<>();
             for (int i = 0; i < resAttrList1.size(); i++) {
                 for (int j = 0; j < resAttrList2.size(); j++) {
-                    if (resAttrList1.get(i).getIPAddress().equals(resAttrList2.get(j).getIPAddress())) {
-                        compresAttr.add(resAttrList1.get(i));
-                    }
+                   if(resAttrList1.get(i).getIPAddress()==null){
+
+                   }else{
+                       if (resAttrList1.get(i).getIPAddress().equals(resAttrList2.get(j).getIPAddress())) {
+
+                           compresAttr.add(resAttrList1.get(i));
+                       }else{
+
+                       }
+                   }
                 }
             }
-            System.out.println("我是集合结果:"+compresAttr);
             resAttrList1.removeAll(compresAttr);
             maps.put("data", resAttrList1);
+            maps.put("code",200);
             return gson.toJson(maps);
         }
+    }
+    //获取设备总数
+    @RequestMapping( value = "/resNum", method = RequestMethod.GET)
+    public Integer countRes(){
+        return this.resService.getRescount();
     }
     @RequestMapping( value = "/addtbl", method = RequestMethod.POST)
     public String addTblCamera(@RequestBody Map<String,Object> map) {

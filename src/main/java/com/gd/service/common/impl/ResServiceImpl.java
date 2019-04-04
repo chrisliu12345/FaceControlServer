@@ -39,6 +39,12 @@ public class ResServiceImpl implements IResService {
     }
 
     @Override
+    public Integer getRescount() {
+        DynamicDataSourceContextHolder.setSlave();
+        return this.iResAttr.getRescount();
+    }
+
+    @Override
     public String queryforobject2(Res_Attr res_attr) {
         return this.iResAttr.queryForObject2(res_attr);
     }
@@ -102,14 +108,15 @@ public class ResServiceImpl implements IResService {
         return this.iResAttr.searchForResAttrByIP(ip);
     }
 
-
-
     @Override
-   //从联网平台获取设备数据
-    public List<Res_Attr> getVideoCameraTbl() {
+    public List<Res_Attr> getVideoCameraTblMa(int page) {
         DynamicDataSourceContextHolder.setSlave();
-        return this.iResAttr.getVideoCameraTbl();
+        return this.iResAttr.getVideoCameraTblMa(page);
     }
+
+
+//从联网平台获取设备数据
+
     @Override
     //从人脸布控系统获取设备数据
     public List<Res_Attr> getVideoCameraTbl2() {

@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface IResService {
     List<Res_Attr> list();//查询所有设备信息
-
+    Integer getRescount();
     void add(Res_Attr res_attr);//添加设备信息
 
     void delete(Res_Attr res);//删除设备信息
@@ -36,14 +36,13 @@ public interface IResService {
 
     Res_Attr DeviceIDforRes(String s);
 
-    List<Res_Attr> getVideoCameraTbl();
+    List<Res_Attr> getVideoCameraTblMa(int page);
     List<Res_Attr> getVideoCameraTbl2();
     int searchForResAttrByIP(String ip);
 
     String queryFortblServiceByIPAddress();
 
     Res_Attr getResAttrOne(int id);
-
 
 
 }

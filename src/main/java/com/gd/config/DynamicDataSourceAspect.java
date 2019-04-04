@@ -44,7 +44,7 @@ public class DynamicDataSourceAspect {
             DynamicDataSourceContextHolder.set(DataSourceKey.ds_slave);
         } else if(dataSourceKey==DataSourceKey.ds_master){
             DynamicDataSourceContextHolder.set(DataSourceKey.ds_master);
-        } else if((methodName.startsWith("getVideo"))){
+        } else if((methodName.startsWith("getVideo"))) {
             DynamicDataSourceContextHolder.set(DataSourceKey.ds_slave);
         }else{
             DynamicDataSourceContextHolder.set(DataSourceKey.ds_master);

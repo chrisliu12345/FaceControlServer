@@ -2,7 +2,7 @@
 
 <configuration debug="false">
 
-    <logger name="com.gd.dao" level="DEBUG"></logger>
+    <logger name="com.gd.dao" level="error"></logger>
     <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
     <springProfile name="dev">
         <property name="LOG_HOME" value="C:/zhyDevLogs"/>
@@ -38,26 +38,10 @@
 
 
     <!--myibatis log configure-->
-    <logger name="com.apache.ibatis" level="TRACE"/>
-    <logger name="java.sql.Connection" level="DEBUG"/>
-    <logger name="java.sql.Statement" level="DEBUG"/>
-    <logger name="java.sql.PreparedStatement" level="DEBUG"/>
-    <!-- 将日志存储到mysql数据库中 -->
-   <!-- <appender name="db-classic-mysql" class="ch.qos.logback.classic.db.DBAppender">
-        <connectionSource class="ch.qos.logback.core.db.DataSourceConnectionSource">
-            <dataSource class="com.alibaba.druid.pool.DruidDataSourceC3P0Adapter">
-                <driverClass>com.mysql.jdbc.Driver</driverClass>
-                 <jdbcUrl>jdbc:mysql://192.168.5.211:3306/ma_fr?characterEncoding=UTF-8&amp;autoReconnect=true&amp;useSSL=false</jdbcUrl>
-                 <user>root</user>
-                 <password>123456</password>
-    &lt;!&ndash; <jdbcUrl>jdbc:mysql://localhost:3306/ma_fr?characterEncoding=UTF-8&amp;autoReconnect=true&amp;useSSL=false</jdbcUrl>&ndash;&gt;
-      <user>root</user>
-       <password>123456</password>
-  </dataSource>
-</connectionSource>
-</appender>-->
-
-
+    <logger name="com.apache.ibatis" level="error"/>
+    <logger name="java.sql.Connection" level="error"/>
+    <logger name="java.sql.Statement" level="error"/>
+    <logger name="java.sql.PreparedStatement" level="error"/>
 <!-- 日志输出级别 -->
     <root level="info">
         <appender-ref ref="STDOUT"/>
